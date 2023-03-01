@@ -50,34 +50,80 @@
 
 
 
-#image built from...
+
+
+# #image built from...
+# FROM debian:buster
+
+# #update cash and install ngnix with the status check after
+# RUN apt-get update && apt-get upgrade -y
+# RUN apt-get install nginx -y
+
+# #install openssl and generating a self certificate
+# RUN mkdir -p /etc/nginx/ssl
+# RUN apt-get install openssl -y
+# RUN openssl req\
+# 	-new\
+# 	-nodes\
+# 	-x509\ 
+# 	-newkey	rsa:2048\ 
+# 	-out /etc/nginx/ssl/inception.crt\ 
+# 	-keyout /etc/nginx/ssl/inception.key\ 
+# 	-subj "/C=FR/ST=IDF/L=Paris/O=42/OU=Shool 42/CN=masamoil.42.fr/UID=masamoil"
+
+# RUN mkdir -p /var/www/html
+# #RUN mkdir -p /var/run/nginx
+
+# COPY conf/nginx.conf /etc/nginx/conf.d/nginx.conf
+
+# RUN chmod -R 755 /var/www/html 
+# RUN chown -R www-data:www-data /var/www/html
+
+# #open the port 443
+# EXPOSE 443
+
+# ENTRYPOINT ["nginx", "-g", "daemon off;" ]
+
+
+# FROM : l'image que vous allez utiliser comme base pour la creation de notre image
 FROM debian:buster
 
-#update cash and install ngnix with the status check after
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install nginx -y
+# Ensuite, utilisez l'instruction RUN pour exécuter une commande dans votre conteneur.
+# Limitez au maximum le nombre d'instructions RUN, afin de limiter le nombre de layers créées, et donc de réduire la taille de notre image Docker.
+RUN     apt update -yq \
+        && apt upgrade -y \
+        && apt install nginx -y
 
-#install openssl and generating a self certificate
-RUN mkdir -p /etc/nginx/ssl
-RUN apt-get install openssl -y
-RUN openssl req\
-	-new\
-	-nodes\
-	-x509\ 
-	-newkey	rsa:2048\ 
-	-out /etc/nginx/ssl/inception.crt\ 
-	-keyout /etc/nginx/ssl/inception.key\ 
-	-subj "/C=FR/ST=IDF/L=Paris/O=42/OU=Shool 42/CN=masamoil.42.fr/UID=masamoil"
+# installation TLS / SSL
+# 1) get openssl pkg
+# 2) .
+# 3) generate key and certificate files
+#clear apt pkg list
+RUN     apt install openssl -y \
+        && mkdir -p /etc/nginx/ssl \
+        && openssl req -x509 -nodes \
+            -out /etc/nginx/ssl/nginx-selfsigned.crt \
+            -keyout /etc/nginx/ssl/nginx-selfsigned.key \
+            -subj "/C=FR/L=Paris/O=42School/CN=vnafissi.42.fr/" \
+        && apt-get clean -y 
 
-RUN mkdir -p /var/www/html
-#RUN mkdir -p /var/run/nginx
+RUN     chmod 755 /etc/nginx/ssl
 
-COPY conf/nginx.conf /etc/nginx/conf.d/nginx.conf
+# modification des droits pour avoir accès au root principal et à l'utilisateur principal)
+#on va déclarer l'utilisateur www-data comme propriétaire de ce dossier. Il s'agit de l'utilisateur par défaut de Nginx 
+RUN     chmod 755 /var/www/html \
+        && chown -R www-data:www-data /var/www/html
 
-RUN chmod -R 755 /var/www/html 
-RUN chown -R www-data:www-data /var/www/html
+# Copy conf file in the container created. it replaces the default existing nginx conf file
+COPY    ./conf/nginx.conf /etc/nginx/nginx.conf
 
-#open the port 443
-#EXPOSE 443
+# L'instruction EXPOSE permet d'indiquer le port sur lequel votre application écoute.
+# EXPOSE ne rend pas les ports du conteneur accessibles à l'hôte, il expose le port spécifié et le rend disponible uniquement pour la communication entre conteneurs
+# Note : Pour que le serveur WordPress puisse communiquer avec le conteneur MariaDB, il est important que les deux conteneurs soient exécutés dans le même réseau docker.
+EXPOSE 443
 
-ENTRYPOINT ["nginx", "-g", "daemon off;" ]
+# L'instruction VOLUME permet d'indiquer quel répertoire vous voulez partager avec votre host.
+# VOLUME /app/logs
+
+#CMD ou ENTRYPOINT doit toujours etre present. exécute une commande lors du demarrage du conteneur.
+ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
