@@ -2,30 +2,34 @@
 # MariaDB Conf refers to the MariaDB server configuration files. These configuration files are used to specify how the MariaDB server should be configured and run. These configuration files include settings such as database directories, port numbers, security options, and performance options. The MariaDB server configuration files are typically stored in the /etc/my.cnf or /etc/mysql/my.cnf file depending on the operating system.
 
 [mysqld]
-datadir=/var/lib/mysql
-socket=/var/lib/mysql/mysql.sock
+user = mysql
+datadir=/var/lib/mysqld
+socket=/run/mysqld/mysqld.sock
+
+bind_address = *
+port = 3306
 
 # Set the default character set and collation
 character-set-server=utf8mb4
 collation-server=utf8mb4_unicode_ci
 
-# Set the default storage engine
-default-storage-engine=InnoDB
+# # Set the default storage engine
+# default-storage-engine=InnoDB
 
-# Set the maximum allowed packet size
-max_allowed_packet=64M
+# # Set the maximum allowed packet size
+# max_allowed_packet=64M
 
-# Set the default authentication plugin
-default_authentication_plugin=mysql_native_password
+# # Set the default authentication plugin
+# default_authentication_plugin=mysql_native_password
 
 # Set the log file paths and levels
 log-error=/var/log/mysql/error.log
-slow-query-log=1
-slow-query-log-file=/var/log/mysql/slow-query.log
-long_query_time=2
+# slow-query-log=1
+# slow-query-log-file=/var/log/mysql/slow-query.log
+# long_query_time=2
 
-# Set the buffer pool size for InnoDB
-innodb_buffer_pool_size=1G
+# # Set the buffer pool size for InnoDB
+# innodb_buffer_pool_size=1G
 
-# Set the default isolation level
-transaction_isolation=READ-COMMITTED
+# # Set the default isolation level
+# transaction_isolation=READ-COMMITTED
