@@ -6,7 +6,6 @@
 
 if [ ! -d /var/lib/mysql/$DB_NAME ]
 then
-
 service mysql start;
 
 mysql -e "CREATE DATABASE $DB_NAME;"

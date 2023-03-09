@@ -1,9 +1,6 @@
 # MariaDB Conf:
 # MariaDB Conf refers to the MariaDB server configuration files. These configuration files are used to specify how the MariaDB server should be configured and run. These configuration files include settings such as database directories, port numbers, security options, and performance options. The MariaDB server configuration files are typically stored in the /etc/my.cnf or /etc/mysql/my.cnf file depending on the operating system.
 
-
-
-
 [mysqld]
 user = mysql
 datadir=/var/lib/mysqld

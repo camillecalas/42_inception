@@ -1,5 +1,5 @@
 
-FROM	debian:buster
+FROM debian:buster
 
 RUN	apt update -yq \
 	&& apt upgrade -y \
@@ -20,14 +20,14 @@ RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
 RUN	mkdir -p /var/www/html
 RUN	chown -R root:root /var/www/html
 
-COPY	conf/www.conf   /etc/php/7.3/fpm/pool.d/www.conf
-RUN	chmod 755       /etc/php/7.3/fpm/pool.d/www.conf
+COPY conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
+RUN	chmod 755 /etc/php/7.3/fpm/pool.d/www.conf
 
 # This command copies the wp_config.sh script, which is responsible for configuring WordPress during startup, and sets the appropriate permissions on it.
-COPY	./tools/wp_config.sh       /etc/wordpress/wp_config.sh
-RUN	chmod 775               /etc/wordpress/wp_config.sh
+COPY ./tools/wp_config.sh /etc/wordpress/wp_config.sh
+RUN	chmod 775 /etc/wordpress/wp_config.sh
 
-EXPOSE	9000
+EXPOSE 9000
 
 # This command sets the working directory to /var/www/html, where WordPress will be installed.
 WORKDIR	/var/www/html
