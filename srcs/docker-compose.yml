@@ -1,0 +1,57 @@
+# Docker Compose est un outil écrit en Python qui permet de décrire, dans un fichier YAML, plusieurs conteneurs comme un ensemble de services. 
+
+version: '3'
+#L'ensemble des conteneurs qui doivent être créés doivent être définis sous l'argument services  . Chaque conteneur commence avec un nom qui lui est propre ; dans notre cas, notre premier conteneur se nommera db  .
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    build:
+      context: ./requirements/mariadb
+      volumes:
+        - mariadb_v:/var/lib/mysql
+      networks:
+        - inception
+      restart: unless-stopped
+      environment:
+        DB_NAME=${DB_NAME}
+        DB_USER=${DB_USER}
+        DB_PASSWORD=${DB_PASSWORD}
+        DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+        DB_HOST=${DB_HOST}
+    
+  wordpress:
+    depends_on:
+      - mariadb
+    image: wordpress
+    build: ./requirements/wordpress
+    networks:
+      - inception
+    volume:
+      - wordpress_v:/var/www/wordpress
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    
+    nginx:
+    container_name: nginx
+    image: nginx
+    build: ./requirements/nginx
+    ports:
+      - "443:443"
+    networks:
+      - inception
+    volumes:
+      - wordpress_v:/var/www/wordpress
+    depends_on:
+      - wordpress
+      - mariadb
+    restart: unless-stopped
+
+volumes:
+  mariadb_v:
+
+  wordpress_v:
