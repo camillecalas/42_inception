@@ -6,52 +6,65 @@ services:
   mariadb:
     container_name: mariadb
     image: mariadb
+    networks:
+      - inception
     build:
       context: ./requirements/mariadb
-      volumes:
-        - mariadb_v:/var/lib/mysql
-      networks:
-        - inception
-      restart: unless-stopped
-      environment:
-        DB_NAME=${DB_NAME}
-        DB_USER=${DB_USER}
-        DB_PASSWORD=${DB_PASSWORD}
-        DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-        DB_HOST=${DB_HOST}
+      dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - mariadb_v:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: "mysql -u${DB_USER} -p${DB_USER_PASSWORD} ${DB_NAME} -e 'SELECT 1'"
+      interval : 1s
+      retries: 10
     
   wordpress:
-    depends_on:
-      - mariadb
+    container_name: wordpress
     image: wordpress
-    build: ./requirements/wordpress
     networks:
       - inception
+    build: 
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    env_file: .env
     volume:
       - wordpress_v:/var/www/wordpress
+    depends_on:
+      - mariadb:
+        condition: service-healthy
     restart: unless-stopped
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
-    
-    nginx:
+  
+  nginx:
     container_name: nginx
     image: nginx
-    build: ./requirements/nginx
-    ports:
-      - "443:443"
     networks:
       - inception
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    env_file: .env
     volumes:
       - wordpress_v:/var/www/wordpress
     depends_on:
       - wordpress
       - mariadb
+    ports:
+      - "443:443"
     restart: unless-stopped
 
 volumes:
   mariadb_v:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ccalas/data/mariadb
 
   wordpress_v:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ccalas/data/wordpress
