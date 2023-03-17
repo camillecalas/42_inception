@@ -4,6 +4,7 @@
 RETURN=1
 while [ $RETURN -ne 0 ]; do 
 	echo "Wordpress is waitig fot Mariadb"
+	
 	sleep 10
 	mysqladmin -u ${DB_USER} -p${DB_USER_PASSWORD} -h mariadb ping
 	RETURN=$?

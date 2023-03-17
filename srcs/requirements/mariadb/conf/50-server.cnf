@@ -3,6 +3,7 @@
 
 [mysqld]
 user = mysql
+pid-file= /run/mysqld/mysqld.pid
 datadir=/var/lib/mysql
 socket=/run/mysqld/mysqld.sock
 
