@@ -3,7 +3,7 @@
 
 [mysqld]
 user = mysql
-datadir=/var/lib/mysqld
+datadir=/var/lib/mysql
 socket=/run/mysqld/mysqld.sock
 
 bind_address = *

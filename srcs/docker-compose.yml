@@ -1,11 +1,11 @@
 # Docker Compose est un outil écrit en Python qui permet de décrire, dans un fichier YAML, plusieurs conteneurs comme un ensemble de services. 
 
-version: '3'
+version: '3.7'
 #L'ensemble des conteneurs qui doivent être créés doivent être définis sous l'argument services  . Chaque conteneur commence avec un nom qui lui est propre ; dans notre cas, notre premier conteneur se nommera db  .
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb
+    # image: mariadb:mariadb
     networks:
       - inception
     build:
@@ -15,30 +15,31 @@ services:
     volumes:
       - mariadb_v:/var/lib/mysql
     restart: unless-stopped
-    healthcheck:
-      test: "mysql -u${DB_USER} -p${DB_USER_PASSWORD} ${DB_NAME} -e 'SELECT 1'"
-      interval : 1s
-      retries: 10
+    # environment: #defines environment variables set in the container
+    #   - DB_NAME=${DB_NAME}
+    #   - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    #   - DB_USER=${DB_USER}
+    #   - DB_PASSWORD=${DB_PASSWORD}
+    #   - DB_HOST=${DB_HOST}
     
   wordpress:
     container_name: wordpress
-    image: wordpress
+    # image: wordpress:wordpress
     networks:
       - inception
     build: 
       context: ./requirements/wordpress
       dockerfile: Dockerfile
     env_file: .env
-    volume:
-      - wordpress_v:/var/www/wordpress
+    volumes:
+      - wordpress_v:/var/www/html
     depends_on:
-      - mariadb:
-        condition: service-healthy
+      - mariadb
     restart: unless-stopped
   
   nginx:
     container_name: nginx
-    image: nginx
+    # image: nginx:nginx
     networks:
       - inception
     build:
@@ -46,7 +47,7 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     volumes:
-      - wordpress_v:/var/www/wordpress
+      - wordpress_v:/var/www/html
     depends_on:
       - wordpress
       - mariadb
@@ -68,3 +69,6 @@ volumes:
       type: none
       o: bind
       device: /home/ccalas/data/wordpress
+
+networks:
+  inception:
