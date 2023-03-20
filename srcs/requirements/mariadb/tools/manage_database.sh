@@ -4,18 +4,19 @@
 
 #!/bin/bash
 
-if [ ! -d /var/lib/mysql/$DB_NAME ]
-then
-    service mysql start;
+# if [ ! -d /var/lib/mysql/$DB_NAME ]
+# then
+#     service mysql start;
 
-    mysql -e "CREATE DATABASE $DB_NAME;"
-    mysql -e "CREATE USER '$DB_USERNAME'@%' IDENTIFIED BY '$DB_PASSWORD';"
-    mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'IDENTIFIED BY '$DB_PASSWORD';"
-    # flushes privileges to ensure that the changes take effect
-    mysql -e "FLUSH PRIVILEGES;"
-    mysql -e "SET PASSWORD FOR root@localhost = PASSWORD('$DB_ROOT_PASSWORD');"
+#     mysql -e "CREATE DATABASE $DB_NAME;"
+#     mysql -e "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+#     mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+#     # flushes privileges to ensure that the changes take effect
+#     mysql -e "FLUSH PRIVILEGES;"
+#     mysql -e "SET PASSWORD FOR root@localhost = PASSWORD('$DB_ROOT_PASSWORD');"
 
-    sleep 1
-    mysqladmin -u root -p${DB_ROOT_PASSWORD} shutdown
-fi
-exec mysqld_safe
+#     sleep 1
+#     mysqladmin -u root -p${DB_ROOT_PASSWORD} shutdown
+# fi
+# exec mysqld_safe
+exec tail -f

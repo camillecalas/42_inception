@@ -32,10 +32,11 @@ RUN openssl req\
 			-new\
 			-nodes\
 			-x509\
-			-newkey rsa:2048\
+			# -newkey rsa:2048\
 			-out /etc/nginx/ssl/42_inception.crt\
 			-keyout /etc/nginx/ssl/42_inception.key\
-			-subj "/C=FR/ST=IDF/L=Paris/O=42/OU=School42/CN=ccalas.42.fr/UID=ccalas"
+			-subj "/C=FR/ST=IDF/L=Paris/O=42/OU=School42/CN=ccalas.42.fr/UID=ccalas" \
+			&& apt-get clean -y
 
 
 RUN	chmod 755 /var/www/html \
