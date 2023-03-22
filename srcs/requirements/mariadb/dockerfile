@@ -8,11 +8,13 @@ RUN apt update -yq \
 	&& apt-get install mariadb-server -yq \
 	&& apt-get install mariadb-client -yq
 
-COPY conf/50-server.cnf /etc/mysql/50-server.conf.d/50-server.cnf
+
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY tools/manage_database.sh /etc/mysql/manage_database.sh
 
 RUN	chmod -R 755 /etc/mysql/manage_database.sh
 
+RUN chmod -R 755 /etc/mysql/mariadb.conf.d/50-server.cnf
 EXPOSE 3306
 
-CMD ["/bin/bash", "/etc/mysql/manage_database.sh"]
+ENTRYPOINT ["/bin/bash", "/etc/mysql/manage_database.sh"]

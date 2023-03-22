@@ -21,8 +21,7 @@
 # exec mysqld_safe
 # # exec tail -f
 
-
-
+set -x
 
 if [ ! -d "/var/lib/mysql/${DB_NAME}" ]
 then
@@ -31,19 +30,19 @@ then
     ##################### DEMARRAGE #####################
     # démarrage du service mariaDB
     # /etc/init.d/mysql start
-    service mysql start
+    service mysql start;
 
     ##################### CREATION USER, DATABASE  #####################
     # -e : Execute statement and quit.
-    mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+    mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
     # MySQL's permissions are based on the host. When you CREATE USER (or GRANT) the user into existence, you provide a host name.
     # It can be '%' (wildcard) or 'localhost' or any other IP or hostname
     # '%' (wildcard) : autorise l'accès pour n'importe quel host.
     # En l'occurence le host du conteneur wordpress pourra s'y connecter aussi !
-    mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';"
+    mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
 
-    mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';"
+    mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_USER_PASSWORD';"
     mysql -e "FLUSH PRIVILEGES;"
 
     #mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';"

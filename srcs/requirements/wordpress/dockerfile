@@ -1,36 +1,81 @@
 
-FROM debian:buster
+# FROM debian:buster
 
-RUN	apt update -yq \
-	&& apt upgrade -y \
-	&& apt install -y php-fpm php-mysql mariadb-client
+# RUN	apt update -yq \
+# 	&& apt upgrade -y \
+# 	&& apt install -y php7.3 php-fpm php-mysql mariadb-client
 
-# This command creates a directory to store the PHP-FPM socket.
-RUN	mkdir -p /run/php
+# # This command creates a directory to store the PHP-FPM socket.
+# RUN	mkdir -p /run/php
 
-# This command installs wget, which is a command-line utility for downloading files from the web. The -y flag answers yes to any prompts during the installation. The second command cleans the package manager's cache to reduce the image's size.
-RUN	apt install wget -y && apt-get clean -y
+# # This command installs wget, which is a command-line utility for downloading files from the web. The -y flag answers yes to any prompts during the installation. The second command cleans the package manager's cache to reduce the image's size.
+# RUN	apt install wget -y && apt-get clean -y
 
-#  This command downloads the WP-CLI (WordPress Command Line Interface) tool, makes it executable, and moves it to the /usr/local/bin directory so that it is available system-wide.
-RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
+# RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www
+# RUN cd /var/www && tar -xzf wordpress-6.0-fr_FR.tar.gz && rm wordpress-6.0-fr_FR.tar.gz
 
-# This command creates the directory where WordPress will be installed and sets its ownership to root.
-RUN	mkdir -p /var/www/html
-RUN	chown -R root:root /var/www/html
+# #  This command downloads the WP-CLI (WordPress Command Line Interface) tool, makes it executable, and moves it to the /usr/local/bin directory so that it is available system-wide.
+# RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+#     && chmod +x wp-cli.phar \
+#     && mv wp-cli.phar /usr/local/bin/wp
 
-COPY conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
-RUN	chmod 755 /etc/php/7.3/fpm/pool.d/www.conf
+# # This command creates the directory where WordPress will be installed and sets its ownership to root.
+# RUN	mkdir -p /var/www/html
+# RUN	chown -R root:root /var/www/html
 
-# This command copies the wp_config.sh script, which is responsible for configuring WordPress during startup, and sets the appropriate permissions on it.
-COPY ./tools/wp_config.sh /etc/wordpress/wp_config.sh
-RUN	chmod 775 /etc/wordpress/wp_config.sh
+# COPY ./conf/www.conf  /etc/php/7.3/fpm/pool.d/www.conf
+# RUN chmod 755       /etc/php/7.3/fpm/pool.d/www.conf
+
+# # This command copies the wp_config.sh script, which is responsible for configuring WordPress during startup, and sets the appropriate permissions on it.
+# COPY ./tools/wp_config.sh   /etc/wordpress/wp_config.sh
+# RUN	chmod 775               /etc/wordpress/wp_config.sh
+
+# EXPOSE 9000
+
+# # This command sets the working directory to /var/www/html, where WordPress will be installed.
+# WORKDIR	/var/www/html
+
+# #This command sets the entry point to the wp_config.sh script, which will configure WordPress during startup. The /bin/bash part specifies the shell to use to execute the script.
+# ENTRYPOINT ["/bin/bash", "/etc/wordpress/wp_config.sh"]
+
+
+
+
+FROM    debian:buster
+
+RUN     apt update -yq \
+        && apt upgrade -y \
+        && apt install -y php7.3 php-fpm php-mysql mariadb-client
+        # && apt install -y php7.3 php-fpm php-mysql mariadb-client
+
+# Create directory for php sock-file:
+# -p is short for --parents - it creates the entire directory tree up to the given directory.
+RUN     mkdir -p /run/php
+
+#wget is a Linux based free and open source utility used for retrieving contents from Web Server
+RUN     apt install wget -y && apt-get clean -y
+
+#download wordpress CLI to allow configuring wordpress in bash script
+RUN     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+        && chmod +x wp-cli.phar \
+        && mv wp-cli.phar /usr/local/bin/wp
+
+RUN     mkdir -p /var/www/html
+RUN     chown -R root:root /var/www/html
+
+#copying the config file for php 
+COPY    conf/www.conf   /etc/php/7.3/fpm/pool.d/www.conf
+RUN     chmod 755       /etc/php/7.3/fpm/pool.d/www.conf
+
+#copying script for wp and launching php-fpm
+COPY    ./tools/wp_config.sh       /etc/wordpress/wp_config.sh
+RUN     chmod 775               /etc/wordpress/wp_config.sh
 
 EXPOSE 9000
 
-# This command sets the working directory to /var/www/html, where WordPress will be installed.
-WORKDIR	/var/www/html
+WORKDIR /var/www/html
 
-#This command sets the entry point to the wp_config.sh script, which will configure WordPress during startup. The /bin/bash part specifies the shell to use to execute the script.
 ENTRYPOINT ["/bin/bash", "/etc/wordpress/wp_config.sh"]
+# CMD /usr/bin/php-fpm -D;
+# CMD /usr/sbin/php-fpm7.3 -F -R
+# /usr/sbin/php-fpm7.3 -F
