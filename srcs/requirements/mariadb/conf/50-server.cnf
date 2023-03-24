@@ -29,6 +29,6 @@ pid-file    = /run/mysqld/mysqld.pid
 socket      = /var/run/mysqld/mysqld.sock #chemin par défaut du socket pour communiquer
 datadir     = /var/lib/mysql #préciser notre dossier qui stockera notre base de données
 basedir     = /usr
-#bind_address=* # toutes les IP du réseau peuvent se connecter (bind_address=XXX.XXX.XX.XX)
-bind-address = 0.0.0.0
+bind_address=* # toutes les IP du réseau peuvent se connecter (bind_address=XXX.XXX.XX.XX)
+
 port        = 3306

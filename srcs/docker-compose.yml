@@ -1,125 +1,47 @@
-# # Docker Compose est un outil écrit en Python qui permet de décrire, dans un fichier YAML, plusieurs conteneurs comme un ensemble de services. 
+# Docker Compose est un outil écrit en Python qui permet de décrire, dans un fichier YAML, plusieurs conteneurs comme un ensemble de services.
 
-# version: '3.7'
-# # L'ensemble des conteneurs qui doivent être créés doivent être définis sous l'argument services  . Chaque conteneur commence avec un nom qui lui est propre ; dans notre cas, notre premier conteneur se nommera db  .
-# services:
-#   mariadb:
-#     container_name: mariadb
-#     networks:
-#       - inception
-#     build:
-#       context: ./requirements/mariadb
-#       dockerfile: Dockerfile
-#     env_file: .env
-#     volumes:
-#       - mariadb_v:/var/lib/mysql
-#     restart: on-failure
-    
-#   wordpress:
-#     container_name: wordpress
-#     networks:
-#       - inception
-#     build: 
-#       context: ./requirements/wordpress
-#       dockerfile: Dockerfile
-#     env_file: .env
-#     volumes:
-#       - wordpress_v:/var/www/html
-#     depends_on:
-#       - mariadb
-#     restart: on-failure
-  
-#   nginx:
-#     container_name: nginx
-#     networks:
-#       - inception
-#     build:
-#       context: ./requirements/nginx
-#       dockerfile: Dockerfile
-#     env_file: .env
-#     volumes:
-#       - wordpress_v:/var/www/html
-#     depends_on:
-#       - wordpress
-#       - mariadb
-#     ports:
-#       - "443:443"
-#     restart: on-failure
-
-# volumes:
-#   mariadb_v:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/ccalas/data/mariadb
-
-#   wordpress_v:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/ccalas/data/wordpress
-
-# networks:
-#   inception:
-
-
-
-
-# L'argument version permet de spécifier à Docker Compose quelle version on souhaite utiliser
-# et donc d'utiliser ou pas certaines versions
 version: '3.7'
 
-# L'ensemble des conteneurs qui doivent être créés doivent être définis sous l'argument services
+# services: keyword indicates that the following lines will define a list of services (containers) to run.
 services:
-  nginx: # projet name 
-    # creation d'une dependance entre 2 conteneurs ==> Docker va demarrer le service db AVANT le service wordpress
+  nginx: 
+    container_name: nginx 
+    hostname: nginx
+    # depends_on: specifies that this service depends on the mariadb service, which means that the mariadb service will be started before the nginx service.
     depends_on:
       - mariadb
-    # hostname declares a custom host name to use for the service container. MUST be a valid RFC 1123 hostname.
-    hostname: nginx
-    image: nginx:nginx
-    container_name: nginx #is a string that specifies a custom container name, rather than a generated default name.
-    build: # specifies the build configuration for creating container image from source
+    build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
     restart: on-failure
     networks:
-    - inception-network
-    ports: # Exposes container ports
-    - "443:443" #HOST:CONTAINER SHOULD always be specified as a (quoted) string.
-    # volumes : permet de stocker l'ensemble du contenu du dossier /var/lib/mysql dans un disque persistant. Et donc, de pouvoir garder les données en local sur notre host.
-    volumes: # On place le chemin local à gauche du séparateur : et le chemin dans le conteneur à droite local:conteneur
+      - inception-network
+    # ports: specifies that the container will publish port 443 to the host.
+    ports: 
+      - "443:443"
+    # volumes: specifies that the wordpress_v volume will be mounted to the /var/www/html directory inside the container.
+    volumes: 
       - wordpress_v:/var/www/html
     env_file: .env
 
   mariadb:
-    hostname: mariadb
-    image: mariadb:mariadb
     container_name: mariadb
+    hostname: mariadb
     build:
       context: ./requirements/mariadb
       dockerfile: Dockerfile
     restart: on-failure
     networks:
       - inception-network
-    volumes: #/var/lib/mysql configuré dans mariadb conf file
+    volumes:
       - mariadb_v:/var/lib/mysql
     env_file: .env
-    # environment: #defines environment variables set in the container
-    #   - DB_NAME=${DB_NAME}
-    #   - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-    #   - DB_USER=${DB_USER}
-    #   - DB_USER_PASSWORD=${DB_USER_PASSWORD}
-    #   - DB_HOST=${DB_HOST}
       
   wordpress:
+    container_name: wordpress
+    hostname: wordpress
     depends_on:
       - mariadb
-    hostname: wordpress
-    image: wordpress:wordpress
-    container_name: wordpress
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
@@ -128,26 +50,23 @@ services:
     restart: on-failure
     networks:
       - inception-network
-    # env_file adds environment variables to the container based on file content.
     env_file: .env
 
-# volumes defines mount host paths or named volumes that MUST be accessible by service containers.
+
 volumes:
   wordpress_v:
-     driver: local # The built-in local driver on Linux accepts options similar to the linux mount command. 
-     driver_opts:
-       type: none
-       o: bind # bind mount pour pouvoir spécifier le chemin où le volume est monté (ci-dessous)
-       device: ${DATA_FOLDER}/wordpress
+    driver: local  # driver:local means that the volume is stored on the host machine
+    driver_opts:
+      type: none   # type: none option specifies that the volume is not created from a pre-existing volume or image
+      o: bind
+      device: ${DATA_FOLDER}/wordpress
        
   mariadb_v:
-     driver: local # The built-in local driver on Linux accepts options similar to the linux mount command. 
+     driver: local 
      driver_opts:
        type: none
-       o: bind # bind mount pour pouvoir spécifier le chemin où le volume est monté (ci-dessous)
+       o: bind
        device: ${DATA_FOLDER}/mariadb
 
-
-# networks defines the networks that service containers are attached to, referencing entries under the top-level networks key.
 networks:
   inception-network:
