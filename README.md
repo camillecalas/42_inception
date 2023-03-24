@@ -36,3 +36,4 @@ show databases;
 use wordpress
 select * from wp_users
 
+# 42_inception_fa
